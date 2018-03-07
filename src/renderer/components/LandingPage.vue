@@ -37,7 +37,8 @@
     components: { SystemInformation },
     methods: {
       open (link) {
-        this.$electron.shell.openExternal(link)
+        // this.$electron.shell.openExternal(link)
+        this.$router.push('/login')
       }
     }
   }

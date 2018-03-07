@@ -20,8 +20,10 @@ function createWindow () {
    * Initial window options
    */
   mainWindow = new BrowserWindow({
-    height: 563,
+    height: 850,
     useContentSize: true,
+    // frame: false,
+    // transparent: true,
     width: 1000
   })
 
@@ -30,6 +32,13 @@ function createWindow () {
   mainWindow.on('closed', () => {
     mainWindow = null
   })
+
+  setTimeout(() => {
+    mainWindow.hide()
+    setTimeout(() => {
+      mainWindow.show()
+    }, 4000)
+  }, 3000)
 }
 
 app.on('ready', createWindow)
