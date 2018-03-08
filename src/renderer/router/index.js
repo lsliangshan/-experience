@@ -4,16 +4,16 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 export default new Router({
+  mode: 'history',
   routes: [
+    {
+      path: '/login',
+      component: () => import('../components/pages/Login')
+    },
     {
       path: '/',
       name: 'landing-page',
-      component: require('@/components/LandingPage').default
-    },
-    {
-      path: '/login',
-      name: 'Login',
-      component: require('@/components/pages/Login').default
+      component: () => import('../components/LandingPage')
     },
     {
       path: '*',
