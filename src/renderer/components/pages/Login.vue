@@ -7,7 +7,7 @@
         </div>
         <div class="main-container">
           <div class="user-icon">
-            <img src="~@/assets/avatar02.jpg">
+            <img :src="getHeadIcon(loginForm.username) || '~@/assets/avatar02.jpg'">
           </div>
           <div class="status-container"></div>
           <div class="login-form" v-if="loginStatus === -1">
@@ -304,10 +304,15 @@
 </style>
 <script>
   const electron = require('electron')
+  const low = require('lowdb')
+  const FileSync = require('lowdb/adapters/FileSync')
+  const adapter = new FileSync('db.json')
+  const db = low(adapter)
   export default {
     name: 'Login',
     data () {
       return {
+        currentUser: {},
         bottomContainerShown: false,
         bgAudio: {
           ref: 'ref-bg-audio',
@@ -326,6 +331,8 @@
     },
     created () {
       this.$nextTick(() => {
+        this.syncCurrentUser()
+
         window.removeEventListener('keydown', this.keyboardEventHandler)
         window.addEventListener('keydown', this.keyboardEventHandler)
 
@@ -335,8 +342,11 @@
           if (res.status === 200) {
             // 登录成功
             this.loginStatus = 1
+            this.syncCurrentUser()
             setTimeout(() => {
               electron.remote.ipcMain.emit('close-login-window')
+              this.loginStatus = -1
+              this.loginForm.password = ''
             }, 1500)
           } else {
             // 登录失败
@@ -379,6 +389,24 @@
       },
       audioEnded () {
         this.bgAudio.src = ''
+      },
+      syncCurrentUser () {
+        this.currentUser = electron.remote.getGlobal('currentUser')
+        if (this.currentUser && this.currentUser.username) {
+          this.loginForm.username = this.currentUser.username
+        }
+      },
+      getHeadIcon (username) {
+        let userInfo = db.get('user')
+          .find({
+            username: username
+          })
+          .value()
+        let headIcon = ''
+        if (userInfo && userInfo.headIcon) {
+          headIcon = userInfo.headIcon
+        }
+        return headIcon
       }
     },
     components: {}

@@ -13,7 +13,7 @@ export default new Router({
     {
       path: '/',
       name: 'landing-page',
-      component: () => import('../components/LandingPage')
+      component: () => import('../components/Home')
     },
     {
       path: '*',

@@ -1,16 +1,28 @@
 'use strict'
 
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, Notification } from 'electron'
 
 import axios from 'axios'
 import querystring from 'querystring'
+import jwt from 'jsonwebtoken'
+
+const low = require('lowdb')
+const FileSync = require('lowdb/adapters/FileSync')
+const adapter = new FileSync('db.json')
+const db = low(adapter)
+
+db.defaults({
+  user: [],
+  currentUser: {}
+}).write()
 
 const instance = axios.create({
   timeout: 3000
 })
 
-const REQUEST_BASE_URL = 'http://127.0.0.1:3000'
-
+const REQUEST_BASE_URL = 'http://talkapi.dei2.com'
+// const REQUEST_BASE_URL = 'http://127.0.0.1:3000'
+const secret = 'com.dei2'
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -25,13 +37,14 @@ const winURL = process.env.NODE_ENV === 'development'
   : `file://${__dirname}/index.html`
 let checkLogin = false
 let loginWindow
+global.currentUser = {}
 
 function createLoginWindow (args) {
   loginWindow = new BrowserWindow({
     width: 250,
     height: 390,
-    show: args.show,
-    parent: mainWindow,
+    show: false,
+    // parent: mainWindow,
     model: true,
     frame: false,
     transparent: true,
@@ -44,12 +57,12 @@ function createLoginWindow (args) {
   // loginWindow.loadURL('http://m.zhaopin.com/account/login?prevUrl=http%3A//m.zhaopin.com/');
   loginWindow.loadURL(`http://localhost:9080/login`)
 
-  loginWindow.on('closed', () => {
-    loginWindow = null
-    if (checkLogin) {
-      mainWindow.show()
-    }
-  })
+  // loginWindow.on('closed', () => {
+  //   // loginWindow = null
+  //   if (checkLogin) {
+  //     mainWindow.show()
+  //   }
+  // })
 }
 
 function createWindow () {
@@ -58,7 +71,7 @@ function createWindow () {
    */
   mainWindow = new BrowserWindow(({
     width: 850,
-    height: 900,
+    height: 700,
     useContentSize: true,
     show: false,
     webPreferences: {
@@ -68,13 +81,35 @@ function createWindow () {
 
   mainWindow.loadURL(winURL)
 
-  mainWindow.on('closed', () => {
-    mainWindow = null
-  })
+  // mainWindow.on('closed', () => {
+  //   mainWindow = null
+  // })
 
-  !checkLogin && createLoginWindow({
-    show: true
-  })
+  createLoginWindow()
+
+  global.currentUser = db.get('currentUser').value()
+  if (global.currentUser && global.currentUser.username) {
+    let _loginToken = db.get('user').find({username: global.currentUser.username}).value().token
+    if (_loginToken) {
+      let _status = jwt.verify(_loginToken, secret, (err, decoded) => {
+        return err || {}
+      })
+      if (!_status.name) {
+        // 登录成功
+        checkLogin = true
+      } else {
+        // token验证失败, 'TokenExpiredError': 失效; 'JsonWebTokenError': token格式不正确
+        checkLogin = false
+      }
+    } else {
+      checkLogin = false
+    }
+  }
+  if (checkLogin) {
+    mainWindow.show()
+  } else {
+    loginWindow.show()
+  }
 
   // mainWindow = new BrowserWindow({
   //   // height: 850
@@ -136,6 +171,24 @@ app.on('ready', () => {
 
 let cacheLoginStatus = false
 
+ipcMain.on('logout', () => {
+  db.get('user')
+    .find({
+      username: global.currentUser.username
+    })
+    .assign({
+      token: ''
+    })
+    .write()
+  global.currentUser.token = ''
+  db.get('currentUser')
+    .assign(global.currentUser)
+    .write()
+  checkLogin = false
+  loginWindow.show()
+  mainWindow.hide()
+})
+
 ipcMain.on('login', async res => {
   let outStatus = {}
   if (!res.username || res.username.trim() === '') {
@@ -160,6 +213,35 @@ ipcMain.on('login', async res => {
     if (outStatus.status === 200) {
       // 登录成功
       cacheLoginStatus = true
+      // 缓存登录的用户信息
+      let _loginInfo = loginData.data.data
+      let _oldUser = db.get('user')
+        .find({
+          username: _loginInfo.username
+        })
+        .value()
+      if (_oldUser) {
+        db.get('user')
+          .find({
+            username: _loginInfo.username
+          })
+          .assign(_loginInfo)
+          .write()
+      } else {
+        db.get('user')
+          .push(_loginInfo)
+          .write()
+      }
+      global.currentUser = _loginInfo
+      // 更新当前用户名
+      db.update('currentUser', () => _loginInfo).write()
+    } else {
+      let notification = new Notification({
+        title: '通知',
+        subtitle: '通知子标题',
+        body: outStatus.message
+      })
+      notification.show()
     }
   }
   ipcMain.emit('login-status', outStatus)
@@ -168,6 +250,7 @@ ipcMain.on('login', async res => {
 ipcMain.on('close-login-window', () => {
   if (cacheLoginStatus) {
     checkLogin = true
-    loginWindow.close()
+    loginWindow.hide()
+    mainWindow.show()
   }
 })

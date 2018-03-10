@@ -11,7 +11,6 @@
 </script>
 
 <style>
-  @import "assets/animate.css/animate.min.css";
   /* CSS */
   * {
     padding: 0;
