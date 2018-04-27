@@ -20,7 +20,7 @@ const instance = axios.create({
   timeout: 3000
 })
 
-const REQUEST_BASE_URL = 'http://talkapi.dei2.com'
+const REQUEST_BASE_URL = 'https://talkapi.dei2.com'
 // const REQUEST_BASE_URL = 'http://127.0.0.1:3000'
 const secret = 'com.dei2'
 /**
@@ -57,6 +57,13 @@ function createLoginWindow (args) {
   // loginWindow.loadURL('http://m.zhaopin.com/account/login?prevUrl=http%3A//m.zhaopin.com/');
   loginWindow.loadURL(`http://localhost:9080/login`)
 
+  const macaddress = require('macaddress')
+  // macaddress.all(function (err, all) {
+  //   if (err) {
+  //     console.log('>>>>>>> error: ', err.message)
+  //   }
+  // })
+  console.log('====2====', JSON.stringify(macaddress.networkInterfaces(), null, 2))
   // loginWindow.on('closed', () => {
   //   // loginWindow = null
   //   if (checkLogin) {
