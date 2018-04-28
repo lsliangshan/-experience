@@ -1,17 +1,15 @@
 <template>
   <div class="home_container">
-    <p>欢迎 {{currentUser.username}} 登录！</p>
-    <button @click="logout">退出登录</button>
+    <transition name="fade">
+      <component :is="currentCommand" :options="commandOptions" :current-user="currentUser"></component>
+    </transition>
   </div>
 </template>
 <style scoped>
   .home_container {
     width: 100%;
     height: 100%;
-    background-color: rgba(18,231,255,0.38);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background-color: #ffffff;
   }
 </style>
 <script>
@@ -20,7 +18,9 @@
     name: 'Home',
     data () {
       return {
-        currentUser: {}
+        currentUser: {},
+        currentCommand: 'NoCommand',
+        commandOptions: {}
       }
     },
     created () {
@@ -34,6 +34,14 @@
           }
         })
       })
+
+      setTimeout(() => {
+        this.currentCommand = 'play-music'
+        this.commandOptions = {
+          name: '夜空中最亮的星',
+          url: 'http://m10.music.126.net/20180428175535/ceb19a975b93df269aedac8f2cd4dcab/ymusic/67a7/1920/cad6/a19f11f01c2fc0c7ead033b2ace15eb7.mp3'
+        }
+      }, 3000)
     },
     methods: {
       logout () {
@@ -46,6 +54,9 @@
         }
       }
     },
-    components: {}
+    components: {
+      NoCommand: () => import('./commands/NoCommand.vue'),
+      PlayMusic: () => import('./commands/PlayMusic.vue')
+    }
   }
 </script>

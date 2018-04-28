@@ -8,7 +8,7 @@ import jwt from 'jsonwebtoken'
 
 const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
-const adapter = new FileSync('db.json')
+const adapter = new FileSync('./db.json')
 const db = low(adapter)
 
 db.defaults({
@@ -20,8 +20,8 @@ const instance = axios.create({
   timeout: 3000
 })
 
-const REQUEST_BASE_URL = 'https://talkapi.dei2.com'
-// const REQUEST_BASE_URL = 'http://127.0.0.1:3000'
+// const REQUEST_BASE_URL = 'https://talkapi.dei2.com'
+const REQUEST_BASE_URL = 'http://127.0.0.1:3001'
 const secret = 'com.dei2'
 /**
  * Set `__static` path to static files in production
@@ -57,13 +57,14 @@ function createLoginWindow (args) {
   // loginWindow.loadURL('http://m.zhaopin.com/account/login?prevUrl=http%3A//m.zhaopin.com/');
   loginWindow.loadURL(`http://localhost:9080/login`)
 
-  const macaddress = require('macaddress')
+  // const macaddress = require('macaddress')
   // macaddress.all(function (err, all) {
   //   if (err) {
   //     console.log('>>>>>>> error: ', err.message)
   //   }
+  //   console.log('====2====', all.utun1.mac, JSON.stringify(all, null, 2))
   // })
-  console.log('====2====', JSON.stringify(macaddress.networkInterfaces(), null, 2))
+  // console.log('====2====', JSON.stringify(macaddress.networkInterfaces(), null, 2))
   // loginWindow.on('closed', () => {
   //   // loginWindow = null
   //   if (checkLogin) {
@@ -82,7 +83,7 @@ function createWindow () {
     useContentSize: true,
     show: false,
     webPreferences: {
-      devTools: false
+      devTools: true
     }
   }))
 
@@ -213,7 +214,7 @@ ipcMain.on('login', async res => {
     let loginData = await instance({
       method: 'POST',
       baseURL: REQUEST_BASE_URL,
-      url: '/Zpm/user/login',
+      url: '/Kapi/index/login',
       data: querystring.stringify(res)
     })
     outStatus = loginData.data
@@ -261,3 +262,24 @@ ipcMain.on('close-login-window', () => {
     mainWindow.show()
   }
 })
+
+// ipcMain.on('download', (args) => {
+//   console.log('>>>>>>>>>', args)
+//   let downloadpath = args.url
+//   let folderpath = args.path
+//   // evt.send('tips', downloadpath)
+//   mainWindow.webContents.downloadURL(downloadpath)
+//
+//   mainWindow.webContents.session.on('will-download', (event, item, webContents) => {
+//     console.log('===== will download')
+//     item.setSavePath(folderpath + `\\${item.getFilename()}`)
+//
+//     item.once('done', (event, state) => {
+//       if (state === 'completed') {
+//         console.log('Download successfully')
+//       } else {
+//         console.log(`Download failed: ${state}`)
+//       }
+//     })
+//   })
+// })
