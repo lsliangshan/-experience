@@ -3,6 +3,14 @@
     <div class="avatar_container">
       <img :src="currentUser.headIcon"/>
     </div>
+    <div class="user_info_container">
+      <p>
+        Username: <span class="" v-text="currentUser.robot.username"></span>
+      </p>
+      <p>
+        Password: <span class="" v-text="currentUser.robot.password"></span>
+      </p>
+    </div>
     <div class="loading_container">
       <img src="http://www.sucaijishi.com/uploadfile/2013/0527/20130527034917143.gif" alt=""/>
     </div>
@@ -40,6 +48,13 @@
   }
   .loading_container img {
     max-width: 70px;
+  }
+  .user_info_container {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+  .user_info_container p {
+    line-height: 40px;
   }
 </style>
 <script>

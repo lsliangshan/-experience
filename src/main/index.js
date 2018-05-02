@@ -5,7 +5,9 @@ import { app, BrowserWindow, ipcMain, Notification } from 'electron'
 import axios from 'axios'
 import querystring from 'querystring'
 import jwt from 'jsonwebtoken'
+import utils from '../renderer/utils'
 
+const fs = require('fs')
 const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
 const adapter = new FileSync('./db.json')
@@ -15,6 +17,35 @@ db.defaults({
   user: [],
   currentUser: {}
 }).write()
+
+let DEVICE_ID = ''
+let _deviceFilePath = './_device'
+let _deviceFileExists = fs.existsSync(_deviceFilePath)
+if (_deviceFileExists) {
+  let _deviceFileContent = fs.readFileSync(_deviceFilePath).toString()
+  _deviceFileContent = JSON.parse(_deviceFileContent)
+  if (_deviceFileContent.id) {
+    DEVICE_ID = _deviceFileContent.id
+  } else {
+    // id字段不存在，或者id的值为空
+    DEVICE_ID = utils.getUUID('d-')
+    fs.writeFileSync(_deviceFilePath, JSON.stringify({
+      id: DEVICE_ID
+    }))
+  }
+} else {
+  // _device文件不存在
+  DEVICE_ID = utils.getUUID('d-')
+  fs.writeFileSync(_deviceFilePath, JSON.stringify({
+    id: DEVICE_ID
+  }))
+}
+
+// const deviceAdapter = new FileSync('./_device')
+// const deviceid = low(deviceAdapter)
+// deviceid.defaults({
+//   id: utils.getUUID('d-')
+// }).write()
 
 const instance = axios.create({
   timeout: 3000
@@ -185,10 +216,12 @@ ipcMain.on('logout', () => {
       username: global.currentUser.username
     })
     .assign({
-      token: ''
+      token: '',
+      robot: {}
     })
     .write()
   global.currentUser.token = ''
+  global.currentUser.robot = {}
   db.get('currentUser')
     .assign(global.currentUser)
     .write()
@@ -210,12 +243,15 @@ ipcMain.on('login', async res => {
       message: '密码不能为空'
     }
   } else {
+    let _data = Object.assign({}, res, {
+      robot: DEVICE_ID
+    })
     // 去登录
     let loginData = await instance({
       method: 'POST',
       baseURL: REQUEST_BASE_URL,
-      url: '/Kapi/index/login',
-      data: querystring.stringify(res)
+      url: '/Kapi/robot/login',
+      data: querystring.stringify(_data)
     })
     outStatus = loginData.data
     if (outStatus.status === 200) {

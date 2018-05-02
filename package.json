@@ -57,6 +57,7 @@
   },
   "dependencies": {
     "axios": "^0.16.1",
+    "fingerprintjs2": "^1.8.0",
     "jsonwebtoken": "^8.2.1",
     "lowdb": "^1.0.0",
     "macaddress": "^0.2.8",

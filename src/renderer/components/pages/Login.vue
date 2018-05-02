@@ -7,7 +7,7 @@
         </div>
         <div class="main-container">
           <div class="user-icon">
-            <img :src="getHeadIcon(loginForm.username) || '~@/assets/avatar02.jpg'">
+            <img :src="getHeadIcon(loginForm.username)">
           </div>
           <div class="status-container"></div>
           <div class="login-form" v-if="loginStatus === -1">
@@ -405,6 +405,9 @@
         let headIcon = ''
         if (userInfo && userInfo.headIcon) {
           headIcon = userInfo.headIcon
+        }
+        if (!headIcon) {
+          headIcon = ((!userInfo || userInfo.gender === 1) ? '/static/images/avatar_male.jpg' : '/static/images/avatar_female.jpg')
         }
         return headIcon
       }

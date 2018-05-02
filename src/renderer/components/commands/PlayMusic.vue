@@ -34,8 +34,8 @@
     },
     created () {
       this.$nextTick(async () => {
-        // let audio = this.$refs[this.audioRef]
-        // audio.play()
+        let audio = this.$refs[this.audioRef]
+        audio.play()
         /**
           electron.remote.ipcMain.emit('download', {
             url: 'http://m10.music.126.net/20180428175535/ceb19a975b93df269aedac8f2cd4dcab/ymusic/67a7/1920/cad6/a19f11f01c2fc0c7ead033b2ace15eb7.mp3',

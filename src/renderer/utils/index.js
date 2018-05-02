@@ -36,6 +36,13 @@
 
 const { session } = require('electron')
 
+function S4 () {
+  return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
+}
+function getUUID (prefix) {
+  return ((prefix || '') + S4() + S4() + '-' + S4() + '-' + S4() + '-' + S4() + '-' + S4() + S4() + S4())
+}
+
 const _getCookies = function (opts) {
   return new Promise((resolve, reject) => {
     let _queryOpts = {}
@@ -89,5 +96,6 @@ let _cookies = {
 }
 
 export default {
-  cookies: _cookies
+  cookies: _cookies,
+  getUUID: getUUID
 }
