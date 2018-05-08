@@ -64,6 +64,10 @@
       }
     },
     created () {
+      var sse = new EventSource('http://127.0.0.1:3001/Kapi/robot/sse?id=robot_4173311215&mt=custom')
+      sse.addEventListener('custom', function (evt) {
+        console.log('>>>>>>>新消息222：', evt.data)
+      })
       this.$nextTick(() => {
         this.syncCurrentUser()
 
