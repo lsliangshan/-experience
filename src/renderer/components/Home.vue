@@ -64,10 +64,6 @@
       }
     },
     created () {
-      var sse = new EventSource('http://127.0.0.1:3001/Kapi/robot/sse?id=robot_4173311215&mt=custom')
-      sse.addEventListener('custom', function (evt) {
-        console.log('>>>>>>>新消息222：', evt.data)
-      })
       this.$nextTick(() => {
         this.syncCurrentUser()
 
@@ -76,6 +72,9 @@
             // 登录成功
             this.syncCurrentUser()
           }
+        })
+        this.connect({
+          id: this.currentUser.robot.uuid
         })
       })
 
@@ -99,6 +98,21 @@
       },
       back () {
         this.currentCommand = 'NoCommand'
+      },
+      connect (args) {
+        let sse = new EventSource(`http://127.0.0.1:3001/Kapi/robot/sse?id=${args.id}&mt=command`)
+        sse.addEventListener('command', this.getNewCommand)
+      },
+      getNewCommand (evt) {
+        let _message = JSON.parse(evt.data)
+        this.currentCommand = _message.message.action
+        switch (this.currentCommand) {
+          case 'play-music':
+            this.commandOptions = _message.message.audio
+            break
+          default:
+            break
+        }
       }
     },
     components: {
