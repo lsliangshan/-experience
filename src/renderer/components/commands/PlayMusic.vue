@@ -19,9 +19,24 @@
           <a href="javascript: void(0)" class="pause" v-else @click="pause"></a>
           <a href="javascript: void(0)" class="next disabled"></a>
         </div>
+        <div class="play_main_container">
+          <div class="play_main_container_top">
+            <p class="bottom_music_name" v-text="playOptions.name"></p>
+            <p class="bottom_music_author" v-text="playOptions.author.name"></p>
+          </div>
+          <div class="play_main_container_bottom">
+            <vue-slider class="music_progress_slider" width="90%" v-model="audioSlider.value"
+                        :tooltip="audioSlider.tooltip"
+                        :bgStyle="audioSlider.bgStyle"
+                        :processStyle="audioSlider.processStyle"
+            ></vue-slider>
+          </div>
+        </div>
+        <div class="play_operation_container"></div>
       </div>
     </div>
     <audio :ref="audioRef" autoplay loop :src="playOptions.url"></audio>
+    <!--<aplayer autoplay :music="music" style="position: absolute; left: 100px; top: 100px; width: 100%; height: 48px;"></aplayer>-->
   </div>
 </template>
 <style scoped>
@@ -196,9 +211,48 @@
   .play_btns .next.disabled:hover {
     background-position: -80px -130px;
   }
+  .play_main_container {
+    width: calc(100% - 137px - 126px);
+    height: 48px;
+  }
+  .play_main_container_top {
+    width: 100%;
+    height: 50%;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .play_main_container_top .bottom_music_name {
+    max-width: 300px;
+    color: #e8e8e8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-wrap: normal;
+  }
+  .play_main_container_top .bottom_music_author {
+    margin-left: 15px;
+    max-width: 220px;
+    color: #9b9b9b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    word-wrap: normal;
+  }
+  .play_main_container_bottom {
+    width: 100%;
+    height: 50%;
+  }
+  .play_operation_container {
+    width: 126px;
+    height: 48px;
+    background-color: red;
+  }
 </style>
 <script>
   // const electron = require('electron')
+  import VueSlider from 'vue-slider-component'
   export default {
     name: 'PlayMusic',
     props: {
@@ -219,6 +273,28 @@
         audio: {
           play: true,
           ele: null
+        },
+        audioSlider: {
+          value: 0,
+          tooltip: false,
+          bgStyle: {
+            backgroundColor: 'rgba(255, 255, 255, 0.4)',
+            boxShadow: 'inset 0.5px 0.5px 3px 1px #444'
+          },
+          processStyle: {
+            backgroundImage: '-webkit-linear-gradient(left, #f05b72, #3498db)'
+          }
+        }
+      }
+    },
+    computed: {
+      music () {
+        let _options = this.playOptions
+        return {
+          title: _options.name,
+          artist: _options.author.name,
+          src: _options.url,
+          pic: _options.album.picUrl
         }
       }
     },
@@ -266,6 +342,8 @@
         this.play()
       }
     },
-    components: {}
+    components: {
+      VueSlider
+    }
   }
 </script>
