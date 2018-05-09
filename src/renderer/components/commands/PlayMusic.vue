@@ -23,13 +23,24 @@
           <div class="play_main_container_top">
             <p class="bottom_music_name" v-text="playOptions.name"></p>
             <p class="bottom_music_author" v-text="playOptions.author.name"></p>
+            <img src="/static/images/loading.gif" class="loading_img" v-if="audio.isWaiting">
           </div>
           <div class="play_main_container_bottom">
             <vue-slider class="music_progress_slider" width="90%" v-model="audioSlider.value"
                         :tooltip="audioSlider.tooltip"
                         :bgStyle="audioSlider.bgStyle"
                         :processStyle="audioSlider.processStyle"
+                        :min="audioSlider.min"
+                        :max="audioSlider.max"
+                        @drag-start="progressDragStart"
+                        @drag-end="changeProgressByDrag"
+                        @callback="changeProgressByClick"
             ></vue-slider>
+            <div class="play_ts_container">
+              <p class="current_time">{{audio.currentTime | timeStr}}</p>
+              <span style="margin-left: 5px; margin-right: 5px;">/</span>
+              <p>{{audio.duration | timeStr}}</p>
+            </div>
           </div>
         </div>
         <div class="play_operation_container"></div>
@@ -219,6 +230,8 @@
     width: 100%;
     height: 50%;
     font-size: 12px;
+    padding-left: 8px;
+    box-sizing: border-box;
     display: inline-flex;
     align-items: center;
     justify-content: flex-start;
@@ -240,9 +253,31 @@
     white-space: nowrap;
     word-wrap: normal;
   }
+  .play_main_container_top .loading_img {
+    width: 15px;
+    height: 15px;
+    margin-left: 8px;
+    margin-top: 3px;
+  }
   .play_main_container_bottom {
     width: 100%;
     height: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .play_ts_container {
+    width: 100px;
+    height: 24px;
+    font-size: 13px;
+    color: #797979;
+    text-shadow: 0 1px 0 #121212;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .current_time {
+    color: #a1a1a1;
   }
   .play_operation_container {
     width: 126px;
@@ -272,10 +307,15 @@
         },
         audio: {
           play: true,
-          ele: null
+          ele: null,
+          currentTime: 0,
+          duration: 0,
+          isWaiting: false // 等待加载音频资源
         },
         audioSlider: {
           value: 0,
+          min: 0,
+          max: 100,
           tooltip: false,
           bgStyle: {
             backgroundColor: 'rgba(255, 255, 255, 0.4)',
@@ -283,7 +323,8 @@
           },
           processStyle: {
             backgroundImage: '-webkit-linear-gradient(left, #f05b72, #3498db)'
-          }
+          },
+          isDrag: false
         }
       }
     },
@@ -300,9 +341,13 @@
     },
     created () {
       this.playOptions = Object.assign({}, this.options)
+      this.audioSlider.max = Math.floor(this.playOptions.dt / 1000)
+      this.audio.duration = this.playOptions.dt
       this.$nextTick(() => {
         this.audio.ele = this.$refs[this.audioRef]
+        this.audio.currentTime = this.audio.ele.currentTime * 1000
         this.play()
+        this.addEventListener()
         /**
           electron.remote.ipcMain.emit('download', {
             url: 'http://m10.music.126.net/20180428175535/ceb19a975b93df269aedac8f2cd4dcab/ymusic/67a7/1920/cad6/a19f11f01c2fc0c7ead033b2ace15eb7.mp3',
@@ -334,11 +379,75 @@
           this.audio.ele.pause()
           this.audio.play = false
         }
+      },
+      _currentTime () {
+        this.audio.currentTime = this.audio.ele.currentTime * 1000
+        this.audioSlider.value = Math.floor(this.audio.ele.currentTime)
+      },
+      _waiting () {
+        this.audio.isWaiting = true
+      },
+      _playing () {
+        this.audio.isWaiting = false
+      },
+      _ended () {
+        // 音频播放完毕
+      },
+      _loadedmetadata (e) {
+        console.log('>>>>>>', e.target.buffered.end(0) / e.target.duration * 100 + '%')
+      },
+      addEventListener () {
+        this.audio.ele.addEventListener('timeupdate', this._currentTime)
+        this.audio.ele.addEventListener('waiting', this._waiting)
+        this.audio.ele.addEventListener('playing', this._playing)
+        this.audio.ele.addEventListener('ended', this._ended)
+        this.audio.ele.addEventListener('progress', this._loadedmetadata)
+      },
+      progressDragStart () {
+        this.audioSlider.isDrag = true
+      },
+      changeProgressByDrag (e) {
+        this.audio.ele.currentTime = parseInt(e.getValue())
+        this.audioSlider.isDrag = false
+      },
+      changeProgressByClick (val) {
+        if (!this.audioSlider.isDrag) {
+          // 点击 切换歌曲进度
+          this.audio.ele.currentTime = parseInt(val)
+        }
+      }
+    },
+    filters: {
+      timeStr (text) {
+        let outStr = ''
+        let ts = parseInt(text)
+        let _hour = Math.floor(ts / (60 * 60 * 1000))
+        if (_hour > 0 && _hour < 10) {
+          outStr += '0' + _hour + ':'
+        } else if (_hour >= 10) {
+          outStr += _hour + ':'
+        }
+        ts = Math.floor(ts % (60 * 60 * 1000))
+        let _minute = Math.floor(ts / (60 * 1000))
+        if (_minute < 10) {
+          outStr += '0' + _minute + ':'
+        } else {
+          outStr += _minute + ':'
+        }
+        ts = Math.floor(ts % (60 * 1000))
+        let _second = Math.floor(ts / 1000)
+        if (_second < 10) {
+          outStr += '0' + _second
+        } else {
+          outStr += _second
+        }
+        return outStr
       }
     },
     watch: {
       'options.id': function (val) {
         this.playOptions = Object.assign({}, this.options)
+        this.audioSlider.max = Math.floor(this.playOptions.dt / 1000)
         this.play()
       }
     },
