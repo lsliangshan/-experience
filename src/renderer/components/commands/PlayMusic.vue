@@ -10,6 +10,18 @@
       <p class="music_name" v-text="playOptions.name"></p>
       <p class="music_author" v-text="playOptions.author.name"></p>
     </div>
+    <!--<div class="music_lyric_container">-->
+      <!--<div class="music_lyric_inner">-->
+        <!--<div class="music_lyric_header_container">-->
+          <!--<p class="music_lyric_header_text" v-text="playOptions.name"></p>-->
+          <!--<p class="music_lyric_header_subtext">-->
+            <!--专辑：<a href="javascript: void(0)" v-text="playOptions.album.name"></a>-->
+            <!--歌手：<a href="javascript: void(0)" v-text="playOptions.author.name"></a>-->
+          <!--</p>-->
+        <!--</div>-->
+        <!--<div class="music_lyric_body_container"></div>-->
+      <!--</div>-->
+    <!--</div>-->
     <div class="play_music_control_container">
       <div class="play_music_control_bg"></div>
       <div class="play_music_control_content">
@@ -72,8 +84,8 @@
     width: 100%;
     height: 100%;
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    /*flex-direction: column;*/
+    align-items: flex-start;
     justify-content: center;
   }
   .play_music_container_bg {
@@ -131,6 +143,51 @@
     margin-top: 15px;
     color: #f5f5f5;
     font-weight: 200;
+  }
+
+  .music_lyric_container {
+    width: 100%;
+    height: calc(100% - 48px);
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .music_lyric_inner {
+    width: 80%;
+    height: 100%;
+    padding: 20px 0 40px 0;
+    box-sizing: border-box;
+  }
+  .music_lyric_header_container {
+    width: 100%;
+    height: 70px;
+    padding-bottom: 8px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-bottom: 1px solid #aaa;
+  }
+  .music_lyric_header_text {
+    font-size: 22px;
+    color: #444;
+  }
+  .music_lyric_header_subtext {
+    font-size: 13px;
+    color: #9b9b9b;
+  }
+  .music_lyric_header_subtext a {
+    color: #0c73c2;
+    margin-right: 8px;
+    text-decoration: none;
+  }
+  .music_lyric_body_container {
+    width: 100%;
+    height: calc(100% - 70px);
+    background-color: #666666;
+    min-height: 400px;
   }
 
   .play_music_control_container {
@@ -282,7 +339,6 @@
   .play_operation_container {
     width: 126px;
     height: 48px;
-    background-color: red;
   }
 </style>
 <script>
