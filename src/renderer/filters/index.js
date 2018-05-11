@@ -83,3 +83,29 @@ export function time (text) {
   }
   return outStr
 }
+
+export function timeStr (text) {
+  let outStr = ''
+  let ts = parseInt(text)
+  let _hour = Math.floor(ts / (60 * 60 * 1000))
+  if (_hour > 0 && _hour < 10) {
+    outStr += '0' + _hour + ':'
+  } else if (_hour >= 10) {
+    outStr += _hour + ':'
+  }
+  ts = Math.floor(ts % (60 * 60 * 1000))
+  let _minute = Math.floor(ts / (60 * 1000))
+  if (_minute < 10) {
+    outStr += '0' + _minute + ':'
+  } else {
+    outStr += _minute + ':'
+  }
+  ts = Math.floor(ts % (60 * 1000))
+  let _second = Math.floor(ts / 1000)
+  if (_second < 10) {
+    outStr += '0' + _second
+  } else {
+    outStr += _second
+  }
+  return outStr
+}

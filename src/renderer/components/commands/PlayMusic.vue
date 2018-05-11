@@ -4,24 +4,27 @@
     <div class="play_music_content">
       <div class="album_container">
         <div class="album_pic_container" :style="{animationPlayState: (audio.play ? 'running' : 'paused')}">
-          <img class="album_pic" :src="playOptions.album.picUrl">
+          <!--<img class="album_pic" :src="playOptions.album.picUrl">-->
+          <div class="album_pic" :style="{backgroundImage: 'url(' + playOptions.album.picUrl + ')'}"></div>
         </div>
       </div>
       <p class="music_name" v-text="playOptions.name"></p>
       <p class="music_author" v-text="playOptions.author.name"></p>
     </div>
-    <!--<div class="music_lyric_container">-->
-      <!--<div class="music_lyric_inner">-->
-        <!--<div class="music_lyric_header_container">-->
-          <!--<p class="music_lyric_header_text" v-text="playOptions.name"></p>-->
-          <!--<p class="music_lyric_header_subtext">-->
-            <!--专辑：<a href="javascript: void(0)" v-text="playOptions.album.name"></a>-->
-            <!--歌手：<a href="javascript: void(0)" v-text="playOptions.author.name"></a>-->
-          <!--</p>-->
-        <!--</div>-->
-        <!--<div class="music_lyric_body_container"></div>-->
-      <!--</div>-->
-    <!--</div>-->
+    <div class="music_lyric_container">
+      <div class="music_lyric_inner">
+        <div class="music_lyric_header_container">
+          <p class="music_lyric_header_text" v-text="playOptions.name"></p>
+          <p class="music_lyric_header_subtext">
+            专辑：<a href="javascript: void(0)" v-text="playOptions.album.name" :title="playOptions.album.name"></a>
+            歌手：<a href="javascript: void(0)" v-text="playOptions.author.name" :title="playOptions.author.name"></a>
+          </p>
+        </div>
+        <div class="music_lyric_body_container">
+          <ls-lyric :lyric="playOptions.lyric" :current-time="audio.currentTime"></ls-lyric>
+        </div>
+      </div>
+    </div>
     <div class="play_music_control_container">
       <div class="play_music_control_bg"></div>
       <div class="play_music_control_content">
@@ -79,6 +82,7 @@
       transform: rotate(360deg);
     }
   }
+
   .play_music_container {
     position: relative;
     width: 100%;
@@ -88,6 +92,7 @@
     align-items: flex-start;
     justify-content: center;
   }
+
   .play_music_container_bg {
     position: absolute;
     left: 0;
@@ -98,8 +103,9 @@
     background-size: cover;
     background-attachment: fixed;
     background-position: 50% 50%;
-    filter: blur(150px);
+    filter: blur(150px) brightness(0.5);
   }
+
   .play_music_content {
     width: 100%;
     height: 100%;
@@ -110,6 +116,7 @@
     align-items: center;
     justify-content: center;
   }
+
   .album_container {
     width: 240px;
     height: 240px;
@@ -117,6 +124,7 @@
     align-items: center;
     justify-content: center;
   }
+
   .album_pic_container {
     width: 220px;
     height: 220px;
@@ -129,19 +137,27 @@
     -moz-box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.3);
     box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.3);
   }
+
   .album_pic {
     width: 220px;
     height: 220px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
   }
+
   .music_name {
     margin-top: 10px;
-    font-size: 30px;
+    font-size: 18px;
     font-weight: 200;
+    padding: 0 10px;
+    color: #c8c8c8;
   }
+
   .music_author {
     font-size: 14px;
     margin-top: 15px;
-    color: #f5f5f5;
+    color: #a8a8a8;
     font-weight: 200;
   }
 
@@ -153,15 +169,17 @@
     align-items: center;
     justify-content: flex-start;
   }
+
   .music_lyric_inner {
     width: 80%;
     height: 100%;
     padding: 20px 0 40px 0;
     box-sizing: border-box;
   }
+
   .music_lyric_header_container {
     width: 100%;
-    height: 70px;
+    /*height: 70px;*/
     padding-bottom: 8px;
     box-sizing: border-box;
     display: flex;
@@ -170,23 +188,37 @@
     justify-content: space-between;
     border-bottom: 1px solid #aaa;
   }
+
   .music_lyric_header_text {
     font-size: 22px;
     color: #444;
   }
+
   .music_lyric_header_subtext {
+    width: 100%;
     font-size: 13px;
-    color: #9b9b9b;
+    color: #333;
+    font-weight: 100;
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
   }
+
   .music_lyric_header_subtext a {
-    color: #0c73c2;
+    color: #c8c8c8;
     margin-right: 8px;
     text-decoration: none;
+    display: inline-block;
+    max-width: 40%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
+
   .music_lyric_body_container {
     width: 100%;
     height: calc(100% - 70px);
-    background-color: #666666;
+    background-color: transparent;
     min-height: 400px;
   }
 
@@ -201,6 +233,7 @@
     align-items: flex-end;
     justify-content: center;
   }
+
   .play_music_control_bg {
     position: absolute;
     width: 100%;
@@ -210,6 +243,7 @@
     background-position: 0 0;
     background-repeat: repeat-x;
   }
+
   .play_music_control_content {
     z-index: 1;
     width: 90%;
@@ -218,6 +252,7 @@
     align-items: center;
     justify-content: space-between;
   }
+
   .play_btns {
     width: 137px;
     height: 48px;
@@ -225,6 +260,7 @@
     align-items: center;
     justify-content: flex-start;
   }
+
   .play_btns a {
     display: block;
     margin-right: 8px;
@@ -232,57 +268,73 @@
     height: 28px;
     background: url('http://static.dei2.com/experience/playbar.png') no-repeat 0 9999px;
   }
+
   .play_btns a.disabled {
     opacity: 0.1;
     cursor: not-allowed;
   }
+
   .play_btns a.disabled:hover {
     opacity: 0.1;
   }
+
   .play_btns .prev {
     background-position: 0 -130px;
   }
+
   .play_btns .prev:hover {
     background-position: -30px -130px;
   }
+
   .play_btns .prev.disabled:hover {
     background-position: 0 -130px;
   }
+
   .play_btns .play {
     width: 36px;
     height: 36px;
     background-position: 0 -204px;
   }
+
   .play_btns .play:hover {
     background-position: -40px -204px;
   }
+
   .play_btns .play.disabled:hover {
     background-position: 0 -204px;
   }
+
   .play_btns .pause {
     width: 36px;
     height: 36px;
     background-position: 0 -165px;
   }
+
   .play_btns .pause:hover {
     background-position: -40px -165px;
   }
+
   .play_btns .pause.disabled:hover {
     background-position: 0 -165px;
   }
+
   .play_btns .next {
     background-position: -80px -130px;
   }
+
   .play_btns .next:hover {
     background-position: -110px -130px;
   }
+
   .play_btns .next.disabled:hover {
     background-position: -80px -130px;
   }
+
   .play_main_container {
     width: calc(100% - 137px - 126px);
     height: 48px;
   }
+
   .play_main_container_top {
     width: 100%;
     height: 50%;
@@ -293,6 +345,7 @@
     align-items: center;
     justify-content: flex-start;
   }
+
   .play_main_container_top .bottom_music_name {
     max-width: 300px;
     color: #e8e8e8;
@@ -301,6 +354,7 @@
     white-space: nowrap;
     word-wrap: normal;
   }
+
   .play_main_container_top .bottom_music_author {
     margin-left: 15px;
     max-width: 220px;
@@ -310,12 +364,14 @@
     white-space: nowrap;
     word-wrap: normal;
   }
+
   .play_main_container_top .loading_img {
     width: 15px;
     height: 15px;
     margin-left: 8px;
     margin-top: 3px;
   }
+
   .play_main_container_bottom {
     width: 100%;
     height: 50%;
@@ -323,6 +379,7 @@
     align-items: center;
     justify-content: space-between;
   }
+
   .play_ts_container {
     width: 100px;
     height: 24px;
@@ -333,9 +390,11 @@
     align-items: center;
     justify-content: center;
   }
+
   .current_time {
     color: #a1a1a1;
   }
+
   .play_operation_container {
     width: 126px;
     height: 48px;
@@ -405,7 +464,7 @@
         this.play()
         this.addEventListener()
         /**
-          electron.remote.ipcMain.emit('download', {
+         electron.remote.ipcMain.emit('download', {
             url: 'http://m10.music.126.net/20180428175535/ceb19a975b93df269aedac8f2cd4dcab/ymusic/67a7/1920/cad6/a19f11f01c2fc0c7ead033b2ace15eb7.mp3',
             path: './'
           })
@@ -413,17 +472,6 @@
       })
     },
     methods: {
-      funDownload (filename) {
-        // 创建隐藏的可下载链接
-        let eleLink = document.createElement('a')
-        eleLink.download = filename || '示例音乐'
-        eleLink.style.display = 'none'
-        eleLink.href = 'http://m10.music.126.net/20180428175535/ceb19a975b93df269aedac8f2cd4dcab/ymusic/67a7/1920/cad6/a19f11f01c2fc0c7ead033b2ace15eb7.mp3'
-        document.body.appendChild(eleLink)
-        eleLink.click()
-        // 然后移除
-        document.body.removeChild(eleLink)
-      },
       play () {
         if (this.audio.ele.paused) {
           this.audio.ele.play()
@@ -473,33 +521,6 @@
         }
       }
     },
-    filters: {
-      timeStr (text) {
-        let outStr = ''
-        let ts = parseInt(text)
-        let _hour = Math.floor(ts / (60 * 60 * 1000))
-        if (_hour > 0 && _hour < 10) {
-          outStr += '0' + _hour + ':'
-        } else if (_hour >= 10) {
-          outStr += _hour + ':'
-        }
-        ts = Math.floor(ts % (60 * 60 * 1000))
-        let _minute = Math.floor(ts / (60 * 1000))
-        if (_minute < 10) {
-          outStr += '0' + _minute + ':'
-        } else {
-          outStr += _minute + ':'
-        }
-        ts = Math.floor(ts % (60 * 1000))
-        let _second = Math.floor(ts / 1000)
-        if (_second < 10) {
-          outStr += '0' + _second
-        } else {
-          outStr += _second
-        }
-        return outStr
-      }
-    },
     watch: {
       'options.id': function (val) {
         this.playOptions = Object.assign({}, this.options)
@@ -508,7 +529,8 @@
       }
     },
     components: {
-      VueSlider
+      VueSlider,
+      LsLyric: () => import('../coms/LsLyric.vue')
     }
   }
 </script>
