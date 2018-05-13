@@ -60,7 +60,9 @@
       return {
         currentUser: {},
         currentCommand: 'NoCommand',
-        commandOptions: {}
+        commandOptions: {},
+        commands: this.$store.state.Main.commands,
+        sseUrl: this.$store.state.Main.sseUrl
       }
     },
     created () {
@@ -77,14 +79,6 @@
           id: this.currentUser.robot.uuid
         })
       })
-
-      // setTimeout(() => {
-      //   this.currentCommand = 'play-music'
-      //   this.commandOptions = {
-      //     name: '夜空中最亮的星',
-      //     url: 'http://m10.music.126.net/20180428175535/ceb19a975b93df269aedac8f2cd4dcab/ymusic/67a7/1920/cad6/a19f11f01c2fc0c7ead033b2ace15eb7.mp3'
-      //   }
-      // }, 3000)
     },
     methods: {
       logout () {
@@ -100,14 +94,14 @@
         this.currentCommand = 'NoCommand'
       },
       connect (args) {
-        let sse = new EventSource(`http://127.0.0.1:3001/Kapi/robot/sse?id=${args.id}&mt=command`)
+        let sse = new EventSource(`${this.sseUrl}?id=${args.id}&mt=command`)
         sse.addEventListener('command', this.getNewCommand)
       },
       getNewCommand (evt) {
         let _message = JSON.parse(evt.data)
         this.currentCommand = _message.message.action
         switch (this.currentCommand) {
-          case 'play-music':
+          case this.commands.playMusic:
             this.commandOptions = _message.message.audio
             break
           default:

@@ -3,7 +3,7 @@
     <div class="play_music_container_bg" :style="{backgroundImage: 'url(' + playOptions.album.picUrl + ')'}"></div>
     <div class="play_music_content">
       <div class="album_container">
-        <div class="album_pic_container" :style="{animationPlayState: (audio.play ? 'running' : 'paused')}">
+        <div class="album_pic_container" :style="{animationPlayState: (!audio.isWaiting && audio.play ? 'running' : 'paused')}">
           <!--<img class="album_pic" :src="playOptions.album.picUrl">-->
           <div class="album_pic" :style="{backgroundImage: 'url(' + playOptions.album.picUrl + ')'}"></div>
         </div>
