@@ -7,7 +7,8 @@
         </div>
         <div class="main-container">
           <div class="user-icon">
-            <img :src="getHeadIcon(loginForm.username)">
+            <img :src="loginForm.username | headIcon">
+            <!--<img :src="getHeadIcon(loginForm.username)">-->
           </div>
           <div class="status-container"></div>
           <div class="login-form" v-if="loginStatus === -1">
@@ -306,7 +307,8 @@
   const electron = require('electron')
   const low = require('lowdb')
   const FileSync = require('lowdb/adapters/FileSync')
-  const adapter = new FileSync('db.json')
+  const dbPath = electron.remote.getGlobal('dbPath')
+  const adapter = new FileSync(dbPath + '/db.json')
   const db = low(adapter)
   export default {
     name: 'Login',
@@ -362,7 +364,7 @@
       },
       toggleBottomContainer () {
         this.bottomContainerShown = !this.bottomContainerShown
-        this.playSound('/static/resources/ls/soso.wav')
+        this.playSound('static/resources/ls/soso.wav')
       },
       keyboardEventHandler (evt) {
         if (evt.keyCode === 13) {
@@ -407,9 +409,26 @@
           headIcon = userInfo.headIcon
         }
         if (!headIcon) {
-          headIcon = ((!userInfo || userInfo.gender === 1) ? '/static/images/avatar_male.jpg' : '/static/images/avatar_female.jpg')
+          headIcon = ((!userInfo || userInfo.gender === 1) ? `/static/images/avatar_male.jpg` : '/static/images/avatar_female.jpg')
         }
         return headIcon
+      }
+    },
+    filters: {
+      headIcon (text) {
+        let userInfo = db.get('user')
+          .find({
+            username: text
+          })
+          .value()
+        let _headIcon = ''
+        if (userInfo && userInfo.headIcon) {
+          _headIcon = userInfo.headIcon
+        }
+        if (!_headIcon) {
+          _headIcon = ((!userInfo || userInfo.gender === 1) ? 'static/images/avatar_male.jpg' : 'static/images/avatar_female.jpg')
+        }
+        return _headIcon
       }
     },
     components: {}

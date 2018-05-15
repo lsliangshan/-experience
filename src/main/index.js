@@ -10,7 +10,14 @@ import utils from '../renderer/utils'
 const fs = require('fs')
 const low = require('lowdb')
 const FileSync = require('lowdb/adapters/FileSync')
-const adapter = new FileSync('./db.json')
+
+let _dir = app.getPath('userData') + '/experience'
+global.dbPath = _dir
+if (!fs.existsSync(_dir)) {
+  fs.mkdirSync(_dir)
+}
+
+const adapter = new FileSync(_dir + '/db.json')
 const db = low(adapter)
 
 db.defaults({
@@ -19,7 +26,7 @@ db.defaults({
 }).write()
 
 let DEVICE_ID = ''
-let _deviceFilePath = './_device'
+let _deviceFilePath = _dir + '/_device'
 let _deviceFileExists = fs.existsSync(_deviceFilePath)
 if (_deviceFileExists) {
   let _deviceFileContent = fs.readFileSync(_deviceFilePath).toString()
@@ -51,8 +58,8 @@ const instance = axios.create({
   timeout: 3000
 })
 
-// const REQUEST_BASE_URL = 'https://talkapi.dei2.com'
-const REQUEST_BASE_URL = 'http://127.0.0.1:3001'
+const REQUEST_BASE_URL = 'https://kapi.dei2.com'
+// const REQUEST_BASE_URL = 'http://127.0.0.1:3001'
 const secret = 'com.dei2'
 /**
  * Set `__static` path to static files in production
@@ -64,7 +71,7 @@ if (process.env.NODE_ENV !== 'development') {
 
 let mainWindow
 const winURL = process.env.NODE_ENV === 'development'
-  ? `http://localhost:9080`
+  ? `http://127.0.0.1:9080`
   : `file://${__dirname}/index.html`
 let checkLogin = false
 let loginWindow
@@ -82,11 +89,13 @@ function createLoginWindow (args) {
     hasShadow: false,
     resizable: false,
     webPreferences: {
-      devTools: false
+      devTools: true
     }
   })
   // loginWindow.loadURL('http://m.zhaopin.com/account/login?prevUrl=http%3A//m.zhaopin.com/');
-  loginWindow.loadURL(`http://localhost:9080/login`)
+  loginWindow.loadURL(process.env.NODE_ENV === 'development'
+    ? `http://127.0.0.1:9080/#login`
+    : `file://${__dirname}/index.html#login`)
 
   // const macaddress = require('macaddress')
   // macaddress.all(function (err, all) {
@@ -197,15 +206,15 @@ app.on('activate', () => {
  */
 
 /*
-import { autoUpdater } from 'electron-updater'
+ import { autoUpdater } from 'electron-updater'
 
-autoUpdater.on('update-downloaded', () => {
-  autoUpdater.quitAndInstall()
-})
+ autoUpdater.on('update-downloaded', () => {
+ autoUpdater.quitAndInstall()
+ })
 
-app.on('ready', () => {
-  if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
-})
+ app.on('ready', () => {
+ if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
+ })
  */
 
 let cacheLoginStatus = false
@@ -281,9 +290,9 @@ ipcMain.on('login', async res => {
       db.update('currentUser', () => _loginInfo).write()
     } else {
       let notification = new Notification({
-        title: '通知',
-        subtitle: '通知子标题',
-        body: outStatus.message
+        title: '错误',
+        // subtitle: '通知子标题',
+        body: outStatus
       })
       notification.show()
     }
